@@ -48,3 +48,10 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
   `SESSION_DRIVER=database` hits SQLite on the first request. The fixture has no database, so the
   file it points at never exists and every request 500s. The config skips migrations and moves
   session/cache/queue to `cookie`/`array`/`sync`.
+- `rails` must set `RAILS_ENV=production` itself — Railpack's Ruby provider sets no `RAILS_ENV`, so
+  `bin/rails server` boots in development, where `config.hosts` is populated and
+  `ActionDispatch::HostAuthorization` answers every request through the provided hostname with
+  `403 Blocked hosts: <service>.up.nouva.cloud`. It is in `railpack.json` deploy variables.
+- Ruby has no prebuilt binary in Railpack's mise setup, so the build compiles CRuby from source
+  (including RDoc). On the 2 GB canary that alone took ~25 minutes before `bundle install` started.
+  Expect a long first build; later builds hit the BuildKit cache.
