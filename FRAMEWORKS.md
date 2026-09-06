@@ -61,3 +61,8 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
   variables because they are per-deployment values. Railpack does set `MIX_ENV=prod` itself.
 - Elixir has the same source-build cost as Ruby, and worse: mise compiles Erlang/OTP from source
   too. Expect a very long first build on a small server.
+- `phoenix` declares `elixir: "~> 1.17"` rather than the generated `"~> 1.14"`. Railpack resolves
+  the constraint to its **lowest** satisfying version, so `~> 1.14` gave Elixir 1.14.5, and the
+  transitive dependency `hpax` (via `bandit`) requires `~> 1.15`; `mix deps.compile` then died with
+  `cannot use ^prefix outside of match clauses` in `lib/hpax/types.ex`. Keep the constraint at or
+  above the highest any dependency needs.
