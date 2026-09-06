@@ -14,3 +14,5 @@ app.get("/healthz", (_req, res) => {
 app.listen(port, "0.0.0.0", () => {
   console.log(`express-probe listening on 0.0.0.0:${port}`);
 });
+
+// touched to prove an explicit watch list overrides the build root (#185)
