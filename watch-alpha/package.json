@@ -1,0 +1,8 @@
+{
+  "name": "watch-alpha",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

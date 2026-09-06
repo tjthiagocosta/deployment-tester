@@ -79,3 +79,13 @@ build must still stream and retain its build output in the dashboard.
   succeeded and the container served traffic, but the deployment was marked Failed and no route was
   published (nouva-platform#187, fixed). Set it per service; the value is the service's own
   `<service>.up.nouva.cloud`.
+
+## Watch-path fixtures
+
+`watch-alpha` and `watch-beta` are dependency-free Node servers that build in well under a
+minute. They exist to exercise the push filter from nouva-platform#185: a push touching only one
+of them must deploy only that one. `shared-lib` is a directory nothing builds from, used to prove
+a service can widen its watch paths past its build root.
+
+Each serves `WATCH_ALPHA_LIVE` / `WATCH_BETA_LIVE` on `/` and reports its `REVISION` file on
+`/healthz`, so which build is running is visible from the response.
