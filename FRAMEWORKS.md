@@ -22,14 +22,13 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
 | `springboot`     | Java       | Spring Boot 4   | `SPRINGBOOT_LIVE`   | –                          |
 | `laravel`        | PHP        | Laravel 13      | `LARAVEL_LIVE`      | `APP_KEY`                  |
 | `rails`          | Ruby       | Rails 8 (API)   | `RAILS_LIVE`        | `SECRET_KEY_BASE`          |
-| `phoenix`        | Elixir     | Phoenix 1.7     | `PHOENIX_LIVE`      | `SECRET_KEY_BASE`, `PHX_HOST` |
+| `phoenix`        | Elixir     | Phoenix 1.7     | `PHOENIX_LIVE`      | `SECRET_KEY_BASE`          |
 | `railpack-static`| TypeScript | Vite (static)   | `RAILPACK_STATIC_LIVE` | –                       |
 
 ## Generating the required secrets
 
 - `APP_KEY` — `base64:$(openssl rand -base64 32)`
 - `SECRET_KEY_BASE` — `openssl rand -hex 64`
-- `PHX_HOST` — the service's provided hostname, e.g. `phoenix.up.nouva.cloud`
 
 ## Notes
 
@@ -57,8 +56,8 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
   Expect a long first build; later builds hit the BuildKit cache.
 - `phoenix` sets `PHX_SERVER=true` in `railpack.json`. Railpack builds a `mix release`, and a
   release only starts the endpoint when that variable is present (`config/runtime.exs`), so without
-  it the container boots and serves nothing. `SECRET_KEY_BASE` and `PHX_HOST` stay service
-  variables because they are per-deployment values. Railpack does set `MIX_ENV=prod` itself.
+  it the container boots and serves nothing. `SECRET_KEY_BASE` stays a service variable because it
+  is a per-deployment secret. Railpack does set `MIX_ENV=prod` itself.
 - Elixir has the same source-build cost as Ruby, and worse: mise compiles Erlang/OTP from source
   too. Expect a very long first build on a small server.
 - `phoenix` declares `elixir: "~> 1.17"` rather than the generated `"~> 1.14"`. Railpack resolves
@@ -66,3 +65,10 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
   transitive dependency `hpax` (via `bandit`) requires `~> 1.15`; `mix deps.compile` then died with
   `cannot use ^prefix outside of match clauses` in `lib/hpax/types.ex`. Keep the constraint at or
   above the highest any dependency needs.
+- `phoenix` deliberately does **not** set `PHX_HOST`. Setting it to the service's own provided
+  hostname makes every deployment fail with `Agent work result conflicts with protected environment
+  material` — the control plane treats each environment-map value as a redaction token, and
+  `PHX_HOST` then collides with `runtimeMetadata.ingressHost` in the deploy result
+  (nouva-platform#187). The build succeeds and the container serves traffic on the server, but the
+  deployment is marked Failed and no route is published. `PHX_HOST` only affects generated URLs, so
+  the fixture leaves it at its `example.com` default; re-add it once #187 is fixed.
