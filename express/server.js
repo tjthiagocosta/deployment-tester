@@ -8,7 +8,7 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/healthz", (_req, res) => {
-  res.json({ ok: true, framework: "express", port });
+  res.json({ ok: true, framework: "express", port, revision: "express-watch-2" });
 });
 
 app.listen(port, "0.0.0.0", () => {
