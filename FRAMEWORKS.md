@@ -55,3 +55,9 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
 - Ruby has no prebuilt binary in Railpack's mise setup, so the build compiles CRuby from source
   (including RDoc). On the 2 GB canary that alone took ~25 minutes before `bundle install` started.
   Expect a long first build; later builds hit the BuildKit cache.
+- `phoenix` sets `PHX_SERVER=true` in `railpack.json`. Railpack builds a `mix release`, and a
+  release only starts the endpoint when that variable is present (`config/runtime.exs`), so without
+  it the container boots and serves nothing. `SECRET_KEY_BASE` and `PHX_HOST` stay service
+  variables because they are per-deployment values. Railpack does set `MIX_ENV=prod` itself.
+- Elixir has the same source-build cost as Ruby, and worse: mise compiles Erlang/OTP from source
+  too. Expect a very long first build on a small server.
