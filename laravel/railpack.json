@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "deploy": {
+    "variables": {
+      "RAILPACK_SKIP_MIGRATIONS": "true",
+      "SESSION_DRIVER": "cookie",
+      "CACHE_STORE": "array",
+      "QUEUE_CONNECTION": "sync",
+      "DB_CONNECTION": "sqlite",
+      "DB_DATABASE": ":memory:"
+    }
+  }
+}

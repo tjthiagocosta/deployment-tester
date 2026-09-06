@@ -43,3 +43,8 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
   Railpack's `dunglas/frankenphp:php8.3.33-bookworm` base ships. Without it, resolving the lock on
   a newer local PHP pulls Symfony 8.x (`php >=8.4.1`) and `composer install` fails inside the
   build. Regenerate the lock with `composer update` after changing that pin.
+- `laravel` ships a `railpack.json` that turns the app stateless: Railpack's Laravel start script
+  runs `php artisan migrate --force` unless `RAILPACK_SKIP_MIGRATIONS=true`, and Laravel's default
+  `SESSION_DRIVER=database` hits SQLite on the first request. The fixture has no database, so the
+  file it points at never exists and every request 500s. The config skips migrations and moves
+  session/cache/queue to `cookie`/`array`/`sync`.
