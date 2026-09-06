@@ -1,0 +1,9 @@
+{
+  "name": "failing-build-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ./build.js",
+    "start": "node server.js"
+  }
+}
