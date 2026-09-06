@@ -72,10 +72,10 @@ build must still stream and retain its build output in the dashboard.
   transitive dependency `hpax` (via `bandit`) requires `~> 1.15`; `mix deps.compile` then died with
   `cannot use ^prefix outside of match clauses` in `lib/hpax/types.ex`. Keep the constraint at or
   above the highest any dependency needs.
-- `phoenix` deliberately does **not** set `PHX_HOST`. Setting it to the service's own provided
-  hostname makes every deployment fail with `Agent work result conflicts with protected environment
-  material` — the control plane treats each environment-map value as a redaction token, and
-  `PHX_HOST` then collides with `runtimeMetadata.ingressHost` in the deploy result
-  (nouva-platform#187). The build succeeds and the container serves traffic on the server, but the
-  deployment is marked Failed and no route is published. `PHX_HOST` only affects generated URLs, so
-  the fixture leaves it at its `example.com` default; re-add it once #187 is fixed.
+- `phoenix` sets `PHX_HOST` to the service's own provided hostname, which is what a real Phoenix
+  app wants. That used to fail every deployment with `Agent work result conflicts with protected
+  environment material`: the control plane treated each environment-map value as a redaction token,
+  so `PHX_HOST` collided with `runtimeMetadata.ingressHost` in the deploy result — the build
+  succeeded and the container served traffic, but the deployment was marked Failed and no route was
+  published (nouva-platform#187, fixed). Set it per service; the value is the service's own
+  `<service>.up.nouva.cloud`.
