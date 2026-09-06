@@ -20,7 +20,7 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
 | `gin`            | Go         | Gin             | `GIN_LIVE`          | –                          |
 | `axum`           | Rust       | Axum            | `AXUM_LIVE`         | –                          |
 | `springboot`     | Java       | Spring Boot 4   | `SPRINGBOOT_LIVE`   | –                          |
-| `laravel`        | PHP        | Laravel 12      | `LARAVEL_LIVE`      | `APP_KEY`                  |
+| `laravel`        | PHP        | Laravel 13      | `LARAVEL_LIVE`      | `APP_KEY`                  |
 | `rails`          | Ruby       | Rails 8 (API)   | `RAILS_LIVE`        | `SECRET_KEY_BASE`          |
 | `phoenix`        | Elixir     | Phoenix 1.7     | `PHOENIX_LIVE`      | `SECRET_KEY_BASE`, `PHX_HOST` |
 | `railpack-static`| TypeScript | Vite (static)   | `RAILPACK_STATIC_LIVE` | –                       |
@@ -39,3 +39,7 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
   Nouva user would not keep, and they make `bundle install` noticeably slower on a small server.
 - `axum` pins `opt-level = 1` / `codegen-units = 16` in its release profile so the build fits in
   a 2 GB server.
+- `laravel` pins `config.platform.php` to `8.3.33` in `composer.json`, which is the PHP that
+  Railpack's `dunglas/frankenphp:php8.3.33-bookworm` base ships. Without it, resolving the lock on
+  a newer local PHP pulls Symfony 8.x (`php >=8.4.1`) and `composer install` fails inside the
+  build. Regenerate the lock with `composer update` after changing that pin.
