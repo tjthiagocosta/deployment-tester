@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { runDatabaseProbe } from "./db-test.js";
 
 const root = resolve(fileURLToPath(new URL("./dist/", import.meta.url)));
 const port = Number.parseInt(process.env.PORT ?? "", 10) || 3000;
@@ -33,6 +34,18 @@ async function send(res, path, status = 200) {
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", "http://localhost");
+    if (url.pathname === "/db-test") {
+      try {
+        const result = await runDatabaseProbe(process.env.DATABASE_URL, "vite-node");
+        res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
+        res.end(JSON.stringify(result));
+      } catch {
+        console.error("Database probe failed for vite-node");
+        res.writeHead(503, { "content-type": "application/json", "cache-control": "no-store" });
+        res.end(JSON.stringify({ ok: false, framework: "vite-node", error: "Database probe failed" }));
+      }
+      return;
+    }
     const relative = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, "");
     const candidate = resolve(join(root, relative));
     if (candidate.startsWith(root) && candidate !== root && extname(candidate)) {

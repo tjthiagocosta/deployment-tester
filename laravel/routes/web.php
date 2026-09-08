@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DatabaseProbeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,3 +15,5 @@ Route::get('/healthz', function () {
         'port' => env('PORT'),
     ]);
 });
+
+Route::get('/db-test', DatabaseProbeController::class);

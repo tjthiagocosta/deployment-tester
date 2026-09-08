@@ -3,6 +3,13 @@
 Each subfolder is a minimal, idiomatic app for one framework, used to smoke-test Nouva
 deployments. Create a service pointed at this repo and set **Build root** to the folder name.
 
+On `test/database-deployment-cases`, also set a PostgreSQL `DATABASE_URL` on every
+successful server fixture and verify `/db-test` before and after redeployment. The response
+must contain `ok: true`, `database: "postgresql"`, and an increasing persistent counter.
+The static fixture uses an Express companion through the public build variable
+`VITE_DB_PROBE_URL=https://<express-host>/db-test?fixture=railpack-static`. The intentional
+failed build cannot reach the runtime database test. See [README.md](README.md) for details.
+
 Every app:
 
 - binds `$PORT` on `0.0.0.0` (the agent always injects `PORT`, see nouva-platform#152)

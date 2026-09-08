@@ -1,7 +1,21 @@
 import express from "express";
+import { runDatabaseProbe } from "./db-test.js";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+
+app.get("/db-test", async (req, res) => {
+  const fixture = req.query.fixture === "railpack-static" ? "railpack-static" : "express";
+  // This public probe returns only a counter and accepts no cookies or credentials.
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Cache-Control", "no-store");
+  try {
+    res.json(await runDatabaseProbe(process.env.DATABASE_URL, fixture));
+  } catch {
+    console.error(`Database probe failed for ${fixture}`);
+    res.status(503).json({ ok: false, framework: fixture, error: "Database probe failed" });
+  }
+});
 
 app.get("/", (_req, res) => {
   res.type("html").send('<h1 id="probe-marker">EXPRESS_LIVE</h1>');

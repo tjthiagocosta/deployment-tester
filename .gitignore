@@ -5,3 +5,11 @@ dist/
 .env.*
 .DS_Store
 *.log
+.next/
+next-env.d.ts
+*.tsbuildinfo
+target/
+__pycache__/
+.pytest_cache/
+phoenix/deps/
+phoenix/_build/

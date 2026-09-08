@@ -2,23 +2,28 @@ defmodule ProbeWeb.Router do
   use ProbeWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, html: {ProbeWeb.Layouts, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, html: {ProbeWeb.Layouts, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
   scope "/", ProbeWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    get "/", PageController, :home
-    get "/healthz", PageController, :healthz
+    get("/", PageController, :home)
+    get("/healthz", PageController, :healthz)
+  end
+
+  scope "/", ProbeWeb do
+    pipe_through(:api)
+    get("/db-test", PageController, :db_test)
   end
 
   # Other scopes may use custom stacks.

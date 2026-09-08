@@ -49,6 +49,7 @@ defmodule Probe.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
+      {:postgrex, "~> 0.22.4"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"}
     ]
