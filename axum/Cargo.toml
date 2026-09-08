@@ -2,11 +2,14 @@
 name = "axum-probe"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.90"
 
 [dependencies]
 axum = "0.7"
 serde_json = "1"
 tokio-postgres = "0.7"
+native-tls = "0.2"
+postgres-native-tls = "0.5"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time"] }
 
 # Keep the release build cheap: the canary is a 2 GB box and a full opt-level 3

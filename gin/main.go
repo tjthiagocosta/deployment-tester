@@ -54,8 +54,8 @@ func probeDatabase(parent context.Context, databaseURL string) (int, error) {
 	}
 	query := parsedURL.Query()
 	if !query.Has("sslmode") {
-		// The fixture targets Nouva's private same-server database network.
-		query.Set("sslmode", "disable")
+		// Nouva's managed PostgreSQL endpoint requires encrypt-only TLS.
+		query.Set("sslmode", "require")
 		parsedURL.RawQuery = query.Encode()
 	}
 	ctx, cancel := context.WithTimeout(parent, 10*time.Second)

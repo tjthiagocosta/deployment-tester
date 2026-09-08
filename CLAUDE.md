@@ -8,7 +8,8 @@ Each build root is independent. Run commands from the corresponding folder.
 - Root, Next.js and railpack-static build: `bun run build`
 - Typecheck: `bunx tsc --noEmit` in root, `nextjs`, and `railpack-static`
 - JavaScript syntax check: `node --check server.js` (root uses `server.mjs`)
-- Database tests: `bun test db-test.test.js` in root, `express`, `watch-alpha`, and `watch-beta`
+- Database tests: `bun test db-test.test.js` in root, `express`, `nextjs`, `watch-alpha`, and `watch-beta`
+- Set `TEST_DATABASE_URL` for persistence tests. Set `TEST_PLAINTEXT_DATABASE_URL` separately to a disposable plaintext-only PostgreSQL server for the TLS-required rejection test. Local plaintext URLs must explicitly use `?sslmode=disable`; tests without the corresponding variable are skipped.
 - Run one database test: `bun test db-test.test.js -t "rejects a missing database URL"`
 - Run locally: `bun run start` for server fixtures, `bun run dev` for Vite
 - No linter is configured in this fixture repository. Do not add one for deployment probes.

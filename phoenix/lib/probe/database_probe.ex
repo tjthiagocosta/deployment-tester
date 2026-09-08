@@ -9,13 +9,24 @@ defmodule Probe.DatabaseProbe do
 
     [username, password] = String.split(uri.userinfo || "", ":", parts: 2)
 
+    ssl_mode = URI.decode_query(uri.query || "") |> Map.get("sslmode", "require")
+
+    ssl =
+      case ssl_mode do
+        "require" -> [verify: :verify_none]
+        "disable" -> false
+        _ -> raise ArgumentError, "Unsupported sslmode"
+      end
+
+    # Nouva currently provides encrypt-only TLS with a self-signed certificate and no service SAN.
+    # sslmode=disable remains an explicit opt-in for the isolated local test database.
     options = [
       hostname: uri.host,
       port: uri.port || 5432,
       database: URI.decode(String.trim_leading(uri.path, "/")),
       username: URI.decode(username),
       password: URI.decode(password),
-      ssl: false,
+      ssl: ssl,
       connect_timeout: 5_000,
       timeout: 5_000,
       pool_size: 1

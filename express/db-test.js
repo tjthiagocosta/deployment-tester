@@ -7,13 +7,23 @@ import pg from "pg";
  */
 export async function runDatabaseProbe(databaseUrl, fixture) {
   if (!databaseUrl) throw new Error("DATABASE_URL is required");
-  const protocol = new URL(databaseUrl).protocol;
+  const connectionUrl = new URL(databaseUrl);
+  const protocol = connectionUrl.protocol;
   if (protocol !== "postgres:" && protocol !== "postgresql:") {
     throw new Error("DATABASE_URL must use PostgreSQL");
   }
 
+  const sslmode = connectionUrl.searchParams.get("sslmode") || "require";
+  if (!["require", "verify-ca", "verify-full", "disable"].includes(sslmode)) {
+    throw new Error("Unsupported PostgreSQL TLS mode");
+  }
+  // Nouva's current PgBouncer endpoint requires encryption with a self-signed certificate.
+  // libpq-compatible require encrypts without server identity verification; it never falls back.
+  connectionUrl.searchParams.set("sslmode", sslmode);
+  connectionUrl.searchParams.set("uselibpqcompat", "true");
+
   const client = new pg.Client({
-    connectionString: databaseUrl,
+    connectionString: connectionUrl.toString(),
     connectionTimeoutMillis: 5000,
     query_timeout: 5000,
   });

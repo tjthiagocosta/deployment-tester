@@ -11,6 +11,14 @@ response contains `ok: true`, `database: "postgresql"`, the framework, and a pos
 Each call increments and reads a committed database row. Call it before and after a
 redeployment to confirm persistence.
 
+Nouva's current PgBouncer endpoint requires TLS and provides a self-signed certificate in its
+documented encrypt-only mode. The JavaScript probes default to `sslmode=require` with libpq
+semantics: traffic is encrypted, but server identity is not verified. They never retry in
+plaintext after a TLS error. This tests Nouva's current connection mode, not authenticated
+server TLS. Explicit `verify-ca` and `verify-full` modes remain available when a trusted
+certificate configuration is supplied. Plain local PostgreSQL tests must explicitly append
+`?sslmode=disable` to their localhost test URL.
+
 The root Vite service uses its Node server for `/db-test` and includes a Test PostgreSQL
 button. `railpack-static` preserves its start-script-free Caddy deployment and calls an
 Express companion: set its public build variable `VITE_DB_PROBE_URL` to the Express

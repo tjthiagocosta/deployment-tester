@@ -1,7 +1,8 @@
 use axum::{http::StatusCode, response::Html, routing::get, Json, Router};
+use postgres_native_tls::MakeTlsConnector;
 use serde_json::json;
 use std::{env, time::Duration};
-use tokio_postgres::NoTls;
+use tokio_postgres::config::SslMode;
 
 #[tokio::main]
 async fn main() {
@@ -50,7 +51,17 @@ async fn probe_database(
     if database_url.is_empty() {
         return Err("DATABASE_URL is required".into());
     }
-    let (client, connection) = tokio_postgres::connect(database_url, NoTls).await?;
+    let mut config: tokio_postgres::Config = database_url.parse()?;
+    if config.get_ssl_mode() == SslMode::Prefer {
+        config.ssl_mode(SslMode::Require);
+    }
+    // Nouva currently serves an encrypt-only self-signed certificate without a service SAN.
+    // Require TLS without falling back to plaintext; explicit sslmode=disable is for local tests.
+    let connector = native_tls::TlsConnector::builder()
+        .danger_accept_invalid_certs(true)
+        .danger_accept_invalid_hostnames(true)
+        .build()?;
+    let (client, connection) = config.connect(MakeTlsConnector::new(connector)).await?;
     // Driving the connection alongside the queries propagates connection failures.
     let queries = async {
         client.batch_execute("CREATE TABLE IF NOT EXISTS nouva_deployment_probe (fixture TEXT PRIMARY KEY, counter INTEGER NOT NULL)").await?;

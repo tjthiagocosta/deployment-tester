@@ -53,6 +53,8 @@ public class ProbeController {
         properties.setProperty("password", URLDecoder.decode(credentials[1].replace("+", "%2B"), StandardCharsets.UTF_8));
       }
     }
+    // Nouva currently serves a self-signed, encrypt-only database certificate.
+    properties.setProperty("sslmode", "require");
     properties.setProperty("connectTimeout", "10");
     properties.setProperty("socketTimeout", "10");
     String jdbcUrl = "jdbc:postgresql://" + uri.getHost() + ":" + (uri.getPort() < 0 ? 5432 : uri.getPort())
