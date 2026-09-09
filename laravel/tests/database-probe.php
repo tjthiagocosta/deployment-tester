@@ -17,6 +17,8 @@ function check(bool $condition, string $message): void
     }
 }
 
+$failureMessage = null;
+
 try {
     foreach ([null, 'postgresql://secret:password@127.0.0.1:1/missing'] as $url) {
         config(['database.connections.pgsql.url' => $url]);
@@ -34,7 +36,8 @@ try {
     DB::purge('pgsql');
     check(is_string($databaseUrl) && $databaseUrl !== '', 'Run with a disposable PostgreSQL DATABASE_URL');
     $counters = [];
-    for ($attempt = 0; $attempt < 2; $attempt++) {
+    for ($attempt = 0; $attempt < 3; $attempt++) {
+        DB::purge('pgsql');
         $request = Request::create('/db-test', 'GET');
         $response = $kernel->handle($request);
         check($response->getStatusCode() === 200, 'Database probe must succeed');
@@ -43,17 +46,24 @@ try {
         check(is_int($body['counter']) && $body['counter'] > 0, 'Counter must be a positive integer');
         $counters[] = $body['counter'];
         $kernel->terminate($request, $response);
+        DB::purge('pgsql');
+        $row = DB::connection('pgsql')->selectOne(
+            'SELECT counter FROM nouva_deployment_probe WHERE fixture = ?', ['laravel'],
+        );
+        check((int) $row->counter === $body['counter'], 'Each probe must commit a counter visible to a new connection');
     }
-    check($counters[1] === $counters[0] + 1, 'Repeated probes must increment the persisted counter');
-    DB::purge('pgsql');
-    $row = DB::connection('pgsql')->selectOne(
-        'SELECT counter FROM nouva_deployment_probe WHERE fixture = ?', ['laravel'],
-    );
-    check((int) $row->counter === $counters[1], 'Counter must be committed and visible to a new connection');
+    check($counters[1] === $counters[0] + 1 && $counters[2] === $counters[1] + 1, 'Fresh connections must increment the persisted counter');
     $health = $kernel->handle(Request::create('/healthz', 'GET'));
     check($health->getStatusCode() === 200, 'Existing health endpoint must remain available');
     echo "Database probe tests passed.\n";
+} catch (Throwable $error) {
+    $failureMessage = $error::class === RuntimeException::class ? $error->getMessage() : $error::class;
 } finally {
     config(['database.connections.pgsql.url' => $databaseUrl]);
     DB::disconnect('pgsql');
+}
+
+if ($failureMessage !== null) {
+    fwrite(STDERR, "Database probe tests failed: {$failureMessage}\n");
+    exit(1);
 }

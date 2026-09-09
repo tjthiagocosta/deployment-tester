@@ -97,7 +97,11 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
-            'options' => [PDO::ATTR_TIMEOUT => 5],
+            'options' => [
+                PDO::ATTR_TIMEOUT => 5,
+                // PHP 8.3 PDO cannot safely deallocate named statements through PgBouncer.
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ],
         ],
 
         'sqlsrv' => [
