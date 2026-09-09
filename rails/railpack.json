@@ -1,5 +1,13 @@
 {
   "$schema": "https://schema.railpack.com",
+  "steps": {
+    "install": {
+      "variables": {
+        "BUNDLE_JOBS": "1",
+        "MAKEFLAGS": "-j1"
+      }
+    }
+  },
   "deploy": {
     "startCommand": "bin/rails server -b 0.0.0.0 -p $PORT",
     "variables": {
