@@ -1,0 +1,22 @@
+name: probe-q4-conditional-env
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/probe-q4.yml'
+
+jobs:
+  probe:
+    name: probe-q4-job
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'probe-env' || '' }}
+    steps:
+      - name: report event
+        env:
+          SECRET: ${{ secrets.PROBE_REPO_SECRET }}
+        run: |
+          echo "PROBE-EVENT-NAME=${{ github.event_name }}"
+          echo "PROBE-SECRET-LEN=${#SECRET}"
+          echo "PROBE-RAN-ON-REF=${GITHUB_REF_NAME}"
