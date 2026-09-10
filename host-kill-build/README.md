@@ -22,5 +22,3 @@ The `RUN ... sleep 600` exists only to widen the window: a cached build spends u
 `buildctl`, which is too short to kill by hand.
 
 See ../oom-build for the opposite case — a kill the builder's budget really does explain.
-
-<!-- probe run: 2026-09-10T19:40:08Z -->
