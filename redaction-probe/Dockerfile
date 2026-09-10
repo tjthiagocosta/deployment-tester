@@ -18,7 +18,7 @@ FROM alpine:3
 
 COPY requirements.txt /probe/requirements.txt
 
-RUN echo "NOUVA_PROBE_MARKER: run-2" && \
+RUN echo "NOUVA_PROBE_MARKER: run-3" && \
     echo "NOUVA_PROBE_KEEP: pip install -r requirements.txt" && \
     echo "NOUVA_PROBE_KEEP: this package requires a newer runtime" && \
     echo "NOUVA_PROBE_KEEP: 2 packages required, 0 satisfied" && \
