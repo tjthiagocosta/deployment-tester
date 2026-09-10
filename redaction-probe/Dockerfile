@@ -10,12 +10,16 @@
 # Also set PROBE_SECRET=zzsecretvaluezz. That one is a customer value and MUST still be masked, glued
 # inside a longer word, or the fix went too far.
 #
-# See nouva-platform#219 (report) and #245 (fix).
+# Bump PROBE_MARKER on every re-run: a cached RUN layer prints nothing, and a probe that prints
+# nothing passes every assertion vacuously.
+#
+# See nouva-platform#219 (report), #245 (control-plane fix) and #262 (agent and REST fix).
 FROM alpine:3
 
 COPY requirements.txt /probe/requirements.txt
 
-RUN echo "NOUVA_PROBE_KEEP: pip install -r requirements.txt" && \
+RUN echo "NOUVA_PROBE_MARKER: run-2" && \
+    echo "NOUVA_PROBE_KEEP: pip install -r requirements.txt" && \
     echo "NOUVA_PROBE_KEEP: this package requires a newer runtime" && \
     echo "NOUVA_PROBE_KEEP: 2 packages required, 0 satisfied" && \
     echo "NOUVA_PROBE_KEEP: reading PGSSLMODE and DATABASE_URL from the environment" && \
@@ -24,4 +28,6 @@ RUN echo "NOUVA_PROBE_KEEP: pip install -r requirements.txt" && \
     echo "NOUVA_PROBE_MASK: prefixzzsecretvaluezzsuffix"
 
 EXPOSE 3000
-CMD ["sh", "-c", "echo REDACTION_PROBE_LIVE; sleep infinity"]
+# Serves so the deploy reaches LIVE instead of failing readiness; the build log is what is under
+# test, but a failed deploy buries it under a readiness error.
+CMD ["sh", "-c", "echo REDACTION_PROBE_LIVE; mkdir -p /www && echo ok > /www/index.html && httpd -f -p 3000 -h /www"]
