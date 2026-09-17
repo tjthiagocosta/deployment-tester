@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 
 // Bumped by hand between commits so a deployment proves WHICH commit it built (#286).
-const PIN = "COMMIT_PIN_B";
+const PIN = "COMMIT_PIN_C";
 const port = Number(process.env.PORT) || 3000;
 
 createServer((req, res) => {
