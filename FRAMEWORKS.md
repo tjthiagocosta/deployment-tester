@@ -25,12 +25,20 @@ So a deployment is verified by `curl -s https://<host>/ | grep <FRAMEWORK>_LIVE`
 | `phoenix`        | Elixir     | Phoenix 1.7     | `PHOENIX_LIVE`      | `SECRET_KEY_BASE`          |
 | `railpack-static`| TypeScript | Vite (static)   | `RAILPACK_STATIC_LIVE` | –                       |
 | `failing-build`  | JavaScript | none (build fails) | –                | –                          |
+| `commit-pin`     | JavaScript | none (node:http) | `COMMIT_PIN_<X>`    | –                          |
 
 ### `failing-build`
 
 Not a framework. Its `npm run build` prints a few lines and exits 1, so it fails in seconds with a
 distinctive `NOUVA_PROBE_BUILD_FAILURE` line. It is the fixture for nouva-platform#181: a failed
 build must still stream and retain its build output in the dashboard.
+
+### `commit-pin`
+
+Not a framework. A dependency-free `node:http` server whose marker is a constant that is bumped
+by hand between commits (`COMMIT_PIN_A`, `COMMIT_PIN_B`, ...). It is the fixture for
+nouva-platform#286: deploying an explicitly selected commit must serve that commit's marker even
+when `main` has since moved to a later pin. Verify with `curl -s https://<host>/healthz`.
 
 ## Generating the required secrets
 
