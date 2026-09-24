@@ -1,0 +1,4 @@
+#!/bin/sh
+# #287 PATH probe: only reachable through the image's custom PATH (/app/bin).
+echo "VERIFY via PATH=$PATH against ${NOUVA_CANDIDATE_URL:-unset}"
+curl -fsS "${NOUVA_CANDIDATE_URL}/health"
