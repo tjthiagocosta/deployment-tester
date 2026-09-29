@@ -1,0 +1,8 @@
+# #360: paste into the Compose migration flow (paths are relative to the repository root).
+services:
+  api:
+    build:
+      context: ./compose-split-context/services/api
+      dockerfile: ../shared/Dockerfile
+    ports:
+      - "8080:8080"
