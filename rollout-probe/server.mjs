@@ -1,5 +1,7 @@
-// App-rollout fixture (#342, #349, #353, #372, #373, #374).
+// App-rollout fixture (#342, #349, #353, #372, #373, #374, #408).
 // FAIL_START=1: exit before listening, so the candidate fails readiness.
+// CRASH_AFTER_MS=<ms>: serve, then exit 1 after that long, so the restart policy keeps the
+// release in a loop that is up most of the time (Docker restarts it after 100 ms once it ran 10 s).
 // IGNORE_SIGTERM=1: keep serving through SIGTERM, so retirement must fall back to SIGKILL.
 // DATA_DIR (e.g. a volume mount): each boot appends a line, proving the volume survived.
 import { appendFileSync, readFileSync } from "node:fs";
@@ -34,3 +36,11 @@ createServer((req, res) => {
   res.setHeader("content-type", "text/plain");
   res.end(`rollout-probe version=${label} host=${process.env.HOSTNAME}\n${boots}`);
 }).listen(port, () => console.log(`PROBE ${now()} listening on ${port} version=${label}`));
+
+const crashAfterMs = Number(process.env.CRASH_AFTER_MS);
+if (Number.isFinite(crashAfterMs) && crashAfterMs > 0) {
+  setTimeout(() => {
+    console.log(`PROBE ${now()} crashing on purpose (CRASH_AFTER_MS=${crashAfterMs}) version=${label}`);
+    process.exit(1);
+  }, crashAfterMs);
+}
